@@ -9,20 +9,16 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] private float _moveSpeed;
 
-    //RotatePlayer
+
 
     void FixedUpdate()
     {
         _rigidbody.velocity = new Vector3(_joystick.Horizontal * _moveSpeed, _rigidbody.velocity.y, _joystick.Vertical * _moveSpeed);
 
-        if (Input.GetMouseButton(0))
-        {
-            RotatePlayer();
-        }
+        if (_joystick.Horizontal != 0 || _joystick.Vertical != 0)
+            transform.rotation = Quaternion.LookRotation(_rigidbody.velocity);
+        
     }
 
-    void RotatePlayer()
-    {
 
-    }
 }

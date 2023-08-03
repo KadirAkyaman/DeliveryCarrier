@@ -7,45 +7,57 @@ public class ObjectStackController : MonoBehaviour
     public static ObjectStackController Instance;
 
     public List<GameObject> objectList = new List<GameObject>();
-    private GameObject _lastObject;
+    public GameObject _lastObject;
     [SerializeField] private Transform _stackStartPos;
+    public int stackSize;
+
+    private float _colliderSize;
+    [SerializeField] private BoxCollider _objectCollider;
+    public float _stackCount;
 
     private void Awake()
     {
         Instance = this;
-        _lastObject = null;
     }
 
+    private void Start()
+    {
+
+        _lastObject = null;
+
+        stackSize = GridController.Instance._width * GridController.Instance._height;//Stack size belirlemek
+
+        _colliderSize = _objectCollider.bounds.size.y;
+        Debug.Log(_colliderSize);
+        _stackCount = 0;
+    }
 
     public void IncreaseStackSize(GameObject _gameObject)
     {
-        if (_lastObject == null)
-        {
-            _gameObject.transform.position = new Vector3(_stackStartPos.transform.position.x, _stackStartPos.transform.position.y);
-        }
-        else
-        {
-            _gameObject.transform.position = new Vector3(_lastObject.transform.position.x, _lastObject.transform.position.y + 1);
-        }
+        _lastObject = _gameObject;//deðdiðimiz obje son obje olsun;
 
-        _gameObject.transform.SetParent(transform);
-        objectList.Add(_gameObject);
+        _lastObject.transform.SetParent(transform);//child obje olsun
 
-        UpdateLastObject();
+
+        objectList.Add(_lastObject);
+
+
+        _gameObject.transform.position = new Vector3(_stackStartPos.position.x, _stackStartPos.position.y + DistanceBetweenObjects(), _stackStartPos.position.z);
+        _stackCount++;        
     }
 
-    private void UpdateLastObject()
+    public void ChangeLastObject()
     {
-        if (_lastObject==null)
-        {
-            _lastObject = objectList[objectList.Count];
-            Debug.Log(_lastObject);
-        }
-        else
+        _lastObject.transform.SetParent(GameObject.Find("Grid").transform);
+        objectList.Remove(_lastObject);
+        if (objectList.Count > 0)
         {
             _lastObject = objectList[objectList.Count - 1];
         }
+    }
 
-        _lastObject.gameObject.transform.localScale *= 2;
+    private float DistanceBetweenObjects()
+    {
+        return 0.15f * _stackCount;
     }
 }

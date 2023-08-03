@@ -3,17 +3,26 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlaceObjectOnGrid : MonoBehaviour
+public class GridController : MonoBehaviour
 {
-    public Transform gridCellPrefab;
-    public Transform objectPrefab;
+    public static GridController Instance;
 
-    [SerializeField] private int _height;
-    [SerializeField] private int _width;
+    public Transform gridCellPrefab;
+   // public Transform objectPrefab;
+
+    public int _height;
+    public int _width;
 
     private Node[,] _nodes;
 
     [SerializeField] private Transform _gridStartPos;
+
+    public List<GameObject> cells = new List<GameObject>();
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     void Start()
     {
@@ -23,7 +32,10 @@ public class PlaceObjectOnGrid : MonoBehaviour
 
     void Update()
     {
-
+        if (PlaceObjectsOnGrid.Instance.isCellOccupied)//Eðer grid tamamen doluysa
+        {
+            Debug.Log("Cells Occupied");
+        }
     }
 
 
@@ -42,6 +54,7 @@ public class PlaceObjectOnGrid : MonoBehaviour
                 Transform obj = Instantiate(gridCellPrefab, worldPos, Quaternion.identity, parentTransform);
                 obj.name = "Cell " + name;
                 _nodes[i, j] = new Node(true, worldPos, obj);
+                cells.Add(obj.gameObject);
                 name++;
             }
         }
