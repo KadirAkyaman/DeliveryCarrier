@@ -4,60 +4,97 @@ using UnityEngine;
 
 public class ObjectStackController : MonoBehaviour
 {
+    [SerializeField] private Transform _player;
     public static ObjectStackController Instance;
 
-    public List<GameObject> objectList = new List<GameObject>();
-    public GameObject _lastObject;
-    [SerializeField] private Transform _stackStartPos;
-    public int stackSize;
+    private Vector3 _currentObjectPos;
+    [SerializeField] private Transform _firstObjectPos;
 
-    private float _colliderSize;
-    [SerializeField] private BoxCollider _objectCollider;
-    public float _stackCount;
+    public List<GameObject> _objectList = new List<GameObject>();
+
+    [SerializeField] private GameObject _lastObject;
+
 
     private void Awake()
     {
         Instance = this;
     }
 
-    private void Start()
+
+    private void OnTriggerStay(Collider other)
     {
 
-        _lastObject = null;
-
-        stackSize = GridController.Instance._width * GridController.Instance._height;//Stack size belirlemek
-
-        _colliderSize = _objectCollider.bounds.size.y;
-        Debug.Log(_colliderSize);
-        _stackCount = 0;
-    }
-
-    public void IncreaseStackSize(GameObject _gameObject)
-    {
-        _lastObject = _gameObject;//deðdiðimiz obje son obje olsun;
-
-        _lastObject.transform.SetParent(transform);//child obje olsun
-
-
-        objectList.Add(_lastObject);
-
-
-        _gameObject.transform.position = new Vector3(_stackStartPos.position.x, _stackStartPos.position.y + DistanceBetweenObjects(), _stackStartPos.position.z);
-        _stackCount++;        
-    }
-
-    public void ChangeLastObject()
-    {
-        _lastObject.transform.SetParent(GameObject.Find("Grid").transform);
-        objectList.Remove(_lastObject);
-        if (objectList.Count > 0)
+        if (other.CompareTag("Pizza") && GameManager.Instance.characterState == CharacterState.Available && !other.GetComponent<ObjectController>().moveToCell && !other.GetComponent<ObjectController>().onPlayer)//Deðdiðimiz son obje cell'e gitmiyorsa
         {
-            _lastObject = objectList[objectList.Count - 1];
+            if (_objectList.Count < GameManager.Instance.maxStackSize)//Karakterimiz üst üste kaç obje toplayabilir?
+            {
+                other.GetComponent<ObjectController>().onPlayer = true;
+                _objectList.Add(other.gameObject);
+
+
+                if (_objectList.Count == 1)
+                {
+                   // _currentObjectPos = new Vector3(other.transform.position.x, _firstObjectPos.position.y, other.transform.position.z); //Y ekseninde ayný hizaya getiriyor
+
+                    //other.gameObject.transform.position = _currentObjectPos;
+                    other.gameObject.GetComponent<ObjectController>().UpdateObjectPosition(_firstObjectPos, true);
+                    StartCoroutine(nameof(ChangeCharacterState));
+                }
+                else if (_objectList.Count > 1)
+                {
+
+                    _currentObjectPos.y = _lastObject.transform.position.y;
+                    other.gameObject.transform.position = _currentObjectPos + new Vector3(0, GameManager.Instance.distanceBetweenObjects, 0);
+                    other.gameObject.GetComponent<ObjectController>().UpdateObjectPosition(_objectList[_objectList.Count - 2].transform, true);
+                    StartCoroutine(nameof(ChangeCharacterState));
+                }
+                _lastObject = other.gameObject;//çarptýðýmýz obje son objemiz olacak
+            }
         }
     }
 
-    private float DistanceBetweenObjects()
+    private void OnCollisionStay(Collision collision)
     {
-        return 0.15f * _stackCount;
+        if (collision.gameObject.CompareTag("Grid") && GameManager.Instance.characterState == CharacterState.Available)
+        {
+
+            if (_objectList.Count > 0)
+            {
+                if (!GridController.Instance.isCellOccupied)//Gridde boþ yer var mý?
+                {
+                    StartCoroutine(nameof(ChangeCharacterState));
+                    _lastObject.GetComponent<ObjectController>().moveToCell = true;//Cell'e gideceðini belirtiyoruz
+                    _lastObject.transform.rotation = Quaternion.Euler(-90, 0, 0);
+                    if (_lastObject != null)
+                    {
+                        _lastObject.GetComponent<ObjectController>().PlaceObjectOnCell(GridController.Instance.cells[GridController.Instance.emptyGridNumber].transform);
+                        GridController.Instance.emptyGridNumber++;
+                        ChangeLastObject();
+                    }
+                    if (GridController.Instance.emptyGridNumber >= GridController.Instance.cells.Count)//Eðer cell doluysa
+                    {
+                        GridController.Instance.isCellOccupied = true;
+                    }
+                }
+            }
+        }
+    }
+
+    void ChangeLastObject()
+    {
+        _objectList.Remove(_lastObject);
+
+        if (_objectList.Count > 0)
+        {
+            _lastObject = _objectList[_objectList.Count - 1];
+        }
+    }
+
+
+    IEnumerator ChangeCharacterState()
+    {
+        GameManager.Instance.characterState = CharacterState.Busy;
+        yield return new WaitForSeconds(GameManager.Instance.characterStateCooldown);
+        GameManager.Instance.characterState = CharacterState.Available;
     }
 }

@@ -4,18 +4,20 @@ using UnityEngine;
 
 public class PlayerAnimatorController : MonoBehaviour
 {
-    private Animator _animator;
+    [SerializeField] private Animator _animator;
     [SerializeField] private FixedJoystick _joystick;
-    private void Start()
-    {
-        _animator = GetComponent<Animator>();
-    }
+
 
     private void Update()
     {
         if (_joystick.Horizontal != 0 || _joystick.Vertical != 0)
-            _animator.SetBool("isRun",true);
+            _animator.SetBool("isWalk", true);
         else
-            _animator.SetBool("isRun", false);
+            _animator.SetBool("isWalk", false);
+
+        if (ObjectStackController.Instance._objectList.Count > 0)
+            _animator.SetBool("isHeld", true);
+        else
+            _animator.SetBool("isHeld", false);
     }
 }

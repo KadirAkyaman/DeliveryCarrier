@@ -6,87 +6,66 @@ public class ObjectController : MonoBehaviour
 {
     public static ObjectController Instance;
 
-    private Rigidbody _objectRb;
-    public BoxCollider _objectCollider;
-    public GameObject _player;
+    [SerializeField] private float followSpeed;
 
-    public bool onCell;//Obje Cell'de mi
-    public bool isHeld;//Obje karakterimizin üzerinde mi
+    public bool moveToCell;
 
-    [SerializeField] private float _movementSpeed;
+    public bool onCell;//Cell'e deðiyor mu?
+
+    public static GameObject lastObject;
+
+    public bool onPlayer;
 
 
+    private void Start()
+    {
+        moveToCell = false;
+        onCell = false;
+        onPlayer = false;
+    }
 
     private void Awake()
     {
         Instance = this;
     }
-    private void Start()
+    public void UpdateObjectPosition(Transform followedObject, bool isFollowStart)
     {
-        _objectRb = GetComponent<Rigidbody>();
-        _objectCollider = GetComponent<BoxCollider>();
 
-        _player = GameObject.Find("Player");
-        onCell = false;
-        isHeld = false;
+        StartCoroutine(StartFollowingToLastObjectPosition(followedObject, isFollowStart));
+    }
+
+    IEnumerator StartFollowingToLastObjectPosition(Transform followedObject, bool isFollowStart)
+    {
+
+        while (isFollowStart)
+        {
+
+            yield return new WaitForEndOfFrame();
+            transform.position = new Vector3(Mathf.Lerp(transform.position.x, followedObject.position.x, followSpeed * Time.deltaTime), transform.position.y, Mathf.Lerp(transform.position.z, followedObject.position.z, followSpeed * Time.deltaTime));
+            if (moveToCell)
+                break;
+        }
     }
 
     private void Update()
     {
-        if (ObjectStackController.Instance.objectList.Count < ObjectStackController.Instance.stackSize && onCell == false && isHeld == false)//eðer stack boyutumuzdan küçükse objeleri toplasýn
-        {
 
-            if (PlaceObjectsOnGrid.Instance.characterState == CharacterState.Available)//Karakter müsait mi?
-            {
-                float distanceToPlayer = Vector3.Distance(transform.position, _player.transform.position);
-                if (distanceToPlayer < GameManager.Instance.objectCollectDistance)
-                {
-                    StartCoroutine(nameof(CollectObject));
-                }
-            }
-            else
-            {
-                Debug.Log("Chatacter is not avaliable");
-            }
+    }
+
+    public void PlaceObjectOnCell(Transform _lastObject)
+    {
+        StartCoroutine(FollowingToCell(_lastObject.transform));
+    }
+
+    IEnumerator FollowingToCell(Transform followedObject)
+    {
+        Debug.Log("following cell");
+        while (!onCell)
+        {
+            yield return new WaitForEndOfFrame();
+            transform.parent = GameObject.Find("Grid").transform;
+            transform.position = new Vector3(Mathf.Lerp(transform.position.x, followedObject.position.x, followSpeed * Time.deltaTime), Mathf.Lerp(transform.position.y, followedObject.position.y, followSpeed * Time.deltaTime), Mathf.Lerp(transform.position.z, followedObject.position.z, followSpeed * Time.deltaTime));
         }
     }
-
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Cell"))
-        {
-            onCell = true;
-        }
-    }
-
-
-    IEnumerator CollectObject()
-    {
-       
-        FollowPlayer();
-        PlaceObjectsOnGrid.Instance.characterState = CharacterState.Busy;
-        yield return new WaitForSeconds(GameManager.Instance.itemCollectCooldown);
-        PlaceObjectsOnGrid.Instance.characterState = CharacterState.Available;
-    }
-    public void FollowPlayer()
-    {
-        isHeld = true;
-        Vector3 targetPosition = _player.transform.position;
-        transform.position = Vector3.MoveTowards(transform.position, targetPosition, _movementSpeed * Time.deltaTime);
-
-        ObjectStackController.Instance.IncreaseStackSize(gameObject);
-    }
-
-    //IEnumerator FollowPlayer()
-    //{
-    //    _objectCollider.enabled = false;
-    //    Vector3 targetPosition = _player.transform.position;
-    //    transform.position = Vector3.MoveTowards(transform.position, targetPosition, _movementSpeed * Time.deltaTime);
-    //
-    //    yield return new WaitForSeconds(2f);
-    //    ObjectStackController.Instance.IncreaseStackSize(gameObject);
-    //}
 }
-
 

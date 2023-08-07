@@ -8,7 +8,7 @@ public class GridController : MonoBehaviour
     public static GridController Instance;
 
     public Transform gridCellPrefab;
-   // public Transform objectPrefab;
+    // public Transform objectPrefab;
 
     public int _height;
     public int _width;
@@ -19,6 +19,9 @@ public class GridController : MonoBehaviour
 
     public List<GameObject> cells = new List<GameObject>();
 
+    public int emptyGridNumber;
+    public bool isCellOccupied;
+
     private void Awake()
     {
         Instance = this;
@@ -28,14 +31,8 @@ public class GridController : MonoBehaviour
     {
         CreateGrid();//oyun baþladýðýnda grid oluþtur
         transform.position = _gridStartPos.position;
-    }
-
-    void Update()
-    {
-        if (PlaceObjectsOnGrid.Instance.isCellOccupied)//Eðer grid tamamen doluysa
-        {
-            Debug.Log("Cells Occupied");
-        }
+        isCellOccupied = false;
+        emptyGridNumber = 0;
     }
 
 
@@ -73,6 +70,4 @@ public class Node
         this.cellPos = cellPos;
         this.obj = obj;
     }
-
-
 }
