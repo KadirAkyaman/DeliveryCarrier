@@ -34,10 +34,11 @@ public class ObjectStackController : MonoBehaviour
 
                 if (_objectList.Count == 1)
                 {
-                   // _currentObjectPos = new Vector3(other.transform.position.x, _firstObjectPos.position.y, other.transform.position.z); //Y ekseninde ayný hizaya getiriyor
+                    // _currentObjectPos = new Vector3(other.transform.position.x, _firstObjectPos.position.y, other.transform.position.z); //Y ekseninde ayný hizaya getiriyor
 
                     //other.gameObject.transform.position = _currentObjectPos;
                     other.gameObject.GetComponent<ObjectController>().UpdateObjectPosition(_firstObjectPos, true);
+                    //other.transform.rotation = Quaternion.Euler(-90, transform.rotation.y, 0);
                     StartCoroutine(nameof(ChangeCharacterState));
                 }
                 else if (_objectList.Count > 1)
@@ -46,6 +47,7 @@ public class ObjectStackController : MonoBehaviour
                     _currentObjectPos.y = _lastObject.transform.position.y;
                     other.gameObject.transform.position = _currentObjectPos + new Vector3(0, GameManager.Instance.distanceBetweenObjects, 0);
                     other.gameObject.GetComponent<ObjectController>().UpdateObjectPosition(_objectList[_objectList.Count - 2].transform, true);
+                    //other.transform.rotation = Quaternion.Euler(-90, transform.rotation.y, 0);  
                     StartCoroutine(nameof(ChangeCharacterState));
                 }
                 _lastObject = other.gameObject;//çarptýðýmýz obje son objemiz olacak

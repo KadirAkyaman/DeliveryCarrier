@@ -127,7 +127,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b3c1a5a7a8243f4282a6449f8995e19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  followSpeed: 30
+  followSpeed: 60
   moveToCell: 0
   onCell: 0
   onPlayer: 0
+  _player: {fileID: 0}

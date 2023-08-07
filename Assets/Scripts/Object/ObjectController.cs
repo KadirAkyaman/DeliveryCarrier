@@ -17,11 +17,13 @@ public class ObjectController : MonoBehaviour
     public bool onPlayer;
 
 
+
     private void Start()
     {
         moveToCell = false;
         onCell = false;
         onPlayer = false;
+
     }
 
     private void Awake()
@@ -49,7 +51,10 @@ public class ObjectController : MonoBehaviour
 
     private void Update()
     {
-
+        // if (onPlayer && !onCell)//Eðer karakterdeyse ve cell üzerinde deðilse
+        // {
+        //     transform.rotation = Quaternion.Euler(transform.rotation.x, _player.transform.rotation.y, transform.rotation.x);
+        // }
     }
 
     public void PlaceObjectOnCell(Transform _lastObject)
