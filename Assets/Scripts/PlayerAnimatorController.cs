@@ -4,20 +4,42 @@ using UnityEngine;
 
 public class PlayerAnimatorController : MonoBehaviour
 {
+    private AnimationType _currentAnimation;
+
     [SerializeField] private Animator _animator;
     [SerializeField] private FixedJoystick _joystick;
 
-
-    private void Update()
+    private Dictionary<AnimationType, string> _animationTypes = new Dictionary<AnimationType, string>()
     {
-        if (_joystick.Horizontal != 0 || _joystick.Vertical != 0)
-            _animator.SetBool("isWalk", true);
-        else
-            _animator.SetBool("isWalk", false);
-
-        if (ObjectStackController.Instance._objectList.Count > 0)
-            _animator.SetBool("isHeld", true);
-        else
-            _animator.SetBool("isHeld", false);
+        {AnimationType.Idle,"Idle"},{AnimationType.Walk,"Walk"}
+    };
+    private void Start()
+    {
+        _currentAnimation = AnimationType.Idle;
     }
+
+    public void PlayAnimation(AnimationType _animationType)
+    {
+        if (_currentAnimation==_animationType)
+        {
+            return;
+        }
+        if (_animationTypes.ContainsKey(_animationType))//add
+        {
+            _animator.Play(_animationTypes[_animationType]);
+            _currentAnimation = _animationType;
+        }
+    }
+
+    public void ChangeAnimationLayer(bool _activeLayer)
+    {
+        int layerIndex = _animator.GetLayerIndex("UpperBody");
+        _animator.SetLayerWeight(layerIndex, (_activeLayer ? 1 : 0));
+    }
+}
+
+public enum AnimationType
+{
+    Walk,
+    Idle
 }

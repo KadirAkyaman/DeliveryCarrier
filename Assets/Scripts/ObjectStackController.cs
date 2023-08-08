@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ObjectStackController : MonoBehaviour
+public class ObjectStackController : MonoBehaviour//CharacterController
 {
     [SerializeField] private Transform _player;
     public static ObjectStackController Instance;
@@ -14,6 +14,8 @@ public class ObjectStackController : MonoBehaviour
 
     [SerializeField] private GameObject _lastObject;
 
+    private PlayerAnimatorController PlayerAnimatorController => playerAnimatorController ??= GetComponent<PlayerAnimatorController>();
+    private PlayerAnimatorController playerAnimatorController;
 
     private void Awake()
     {
@@ -24,33 +26,34 @@ public class ObjectStackController : MonoBehaviour
     private void OnTriggerStay(Collider other)
     {
 
-        if (other.CompareTag("Pizza") && GameManager.Instance.characterState == CharacterState.Available && !other.GetComponent<ObjectController>().moveToCell && !other.GetComponent<ObjectController>().onPlayer)//Deðdiðimiz son obje cell'e gitmiyorsa
+        if (other.CompareTag("Pizza") && GameManager.Instance.characterState == CharacterState.Available)//Deðdiðimiz son obje cell'e gitmiyorsa
         {
-            if (_objectList.Count < GameManager.Instance.maxStackSize)//Karakterimiz üst üste kaç obje toplayabilir?
+            ObjectController _objController = other.GetComponent<ObjectController>();//DÜZENLENDÝ
+            if (!_objController.moveToCell && !_objController.onPlayer)
             {
-                other.GetComponent<ObjectController>().onPlayer = true;
-                _objectList.Add(other.gameObject);
-
-
-                if (_objectList.Count == 1)
-                {
-                    // _currentObjectPos = new Vector3(other.transform.position.x, _firstObjectPos.position.y, other.transform.position.z); //Y ekseninde ayný hizaya getiriyor
-
-                    //other.gameObject.transform.position = _currentObjectPos;
-                    other.gameObject.GetComponent<ObjectController>().UpdateObjectPosition(_firstObjectPos, true);
-                    //other.transform.rotation = Quaternion.Euler(-90, transform.rotation.y, 0);
-                    StartCoroutine(nameof(ChangeCharacterState));
-                }
-                else if (_objectList.Count > 1)
+                if (_objectList.Count < GameManager.Instance.maxStackSize)//Karakterimiz üst üste kaç obje toplayabilir?
                 {
 
-                    _currentObjectPos.y = _lastObject.transform.position.y;
-                    other.gameObject.transform.position = _currentObjectPos + new Vector3(0, GameManager.Instance.distanceBetweenObjects, 0);
-                    other.gameObject.GetComponent<ObjectController>().UpdateObjectPosition(_objectList[_objectList.Count - 2].transform, true);
-                    //other.transform.rotation = Quaternion.Euler(-90, transform.rotation.y, 0);  
-                    StartCoroutine(nameof(ChangeCharacterState));
+                    _objController.onPlayer = true;
+                    _objectList.Add(other.gameObject);
+
+
+                    if (_objectList.Count == 1)
+                    {
+                        _objController.UpdateObjectPosition(_firstObjectPos, true);
+                        StartCoroutine(nameof(ChangeCharacterState));
+                        PlayerAnimatorController.ChangeAnimationLayer(true);
+                    }
+                    else if (_objectList.Count > 1)
+                    {
+
+                        _currentObjectPos.y = _lastObject.transform.position.y;
+                        other.gameObject.transform.position = _currentObjectPos + new Vector3(0, GameManager.Instance.distanceBetweenObjects, 0);
+                        _objController.UpdateObjectPosition(_objectList[_objectList.Count - 2].transform, true);
+                        StartCoroutine(nameof(ChangeCharacterState));
+                    }
+                    _lastObject = other.gameObject;//çarptýðýmýz obje son objemiz olacak
                 }
-                _lastObject = other.gameObject;//çarptýðýmýz obje son objemiz olacak
             }
         }
     }
@@ -62,18 +65,25 @@ public class ObjectStackController : MonoBehaviour
 
             if (_objectList.Count > 0)
             {
-                if (!GridController.Instance.isCellOccupied)//Gridde boþ yer var mý?
+                if (!GridController.Instance.isCellOccupied)//Gridde bos yer var mi?
                 {
+
+                    ObjectController _objController = _lastObject.GetComponent<ObjectController>();
                     StartCoroutine(nameof(ChangeCharacterState));
-                    _lastObject.GetComponent<ObjectController>().moveToCell = true;//Cell'e gideceðini belirtiyoruz
+                    _objController.moveToCell = true;//Cell'e gidecegini belirtiyoruz
                     _lastObject.transform.rotation = Quaternion.Euler(-90, 0, 0);
                     if (_lastObject != null)
                     {
-                        _lastObject.GetComponent<ObjectController>().PlaceObjectOnCell(GridController.Instance.cells[GridController.Instance.emptyGridNumber].transform);
+                        _objController.PlaceObjectOnCell(GridController.Instance.cells[GridController.Instance.emptyGridNumber].transform);
                         GridController.Instance.emptyGridNumber++;
                         ChangeLastObject();
+
+                        if (_objectList.Count<=0)
+                        {
+                            PlayerAnimatorController.ChangeAnimationLayer(false);
+                        }
                     }
-                    if (GridController.Instance.emptyGridNumber >= GridController.Instance.cells.Count)//Eðer cell doluysa
+                    if (GridController.Instance.emptyGridNumber >= GridController.Instance.cells.Count)//Eger cell doluysa
                     {
                         GridController.Instance.isCellOccupied = true;
                     }
@@ -85,7 +95,6 @@ public class ObjectStackController : MonoBehaviour
     void ChangeLastObject()
     {
         _objectList.Remove(_lastObject);
-
         if (_objectList.Count > 0)
         {
             _lastObject = _objectList[_objectList.Count - 1];

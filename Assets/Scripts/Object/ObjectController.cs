@@ -16,6 +16,8 @@ public class ObjectController : MonoBehaviour
 
     public bool onPlayer;
 
+    [SerializeField] private GameObject _gridObject;
+
 
 
     private void Start()
@@ -23,6 +25,7 @@ public class ObjectController : MonoBehaviour
         moveToCell = false;
         onCell = false;
         onPlayer = false;
+        _gridObject = GridManager.Instance.grid;
 
     }
 
@@ -49,13 +52,7 @@ public class ObjectController : MonoBehaviour
         }
     }
 
-    private void Update()
-    {
-        // if (onPlayer && !onCell)//Eðer karakterdeyse ve cell üzerinde deðilse
-        // {
-        //     transform.rotation = Quaternion.Euler(transform.rotation.x, _player.transform.rotation.y, transform.rotation.x);
-        // }
-    }
+
 
     public void PlaceObjectOnCell(Transform _lastObject)
     {
@@ -64,11 +61,11 @@ public class ObjectController : MonoBehaviour
 
     IEnumerator FollowingToCell(Transform followedObject)
     {
-        Debug.Log("following cell");
+
         while (!onCell)
         {
             yield return new WaitForEndOfFrame();
-            transform.parent = GameObject.Find("Grid").transform;
+            transform.parent = _gridObject.transform;
             transform.position = new Vector3(Mathf.Lerp(transform.position.x, followedObject.position.x, followSpeed * Time.deltaTime), Mathf.Lerp(transform.position.y, followedObject.position.y, followSpeed * Time.deltaTime), Mathf.Lerp(transform.position.z, followedObject.position.z, followSpeed * Time.deltaTime));
         }
     }
