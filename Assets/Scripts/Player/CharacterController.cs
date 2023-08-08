@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ObjectStackController : MonoBehaviour//CharacterController
+public class CharacterController : MonoBehaviour//CharacterController
 {
     [SerializeField] private Transform _player;
-    public static ObjectStackController Instance;
+    public static CharacterController Instance;
 
     private Vector3 _currentObjectPos;
     [SerializeField] private Transform _firstObjectPos;
