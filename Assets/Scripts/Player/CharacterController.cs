@@ -40,16 +40,18 @@ public class CharacterController : MonoBehaviour//CharacterController
 
                     if (_objectList.Count == 1)
                     {
-                        _objController.UpdateObjectPosition(_firstObjectPos, true);
+                        _objController.UpdateObjectPosition(_firstObjectPos, true);//, _objectList.Count
                         StartCoroutine(nameof(ChangeCharacterState));
                         PlayerAnimatorController.ChangeAnimationLayer(true);
                     }
                     else if (_objectList.Count > 1)
                     {
-
-                        _currentObjectPos.y = _lastObject.transform.position.y;
-                        other.gameObject.transform.position = _currentObjectPos + new Vector3(0, GameManager.Instance.distanceBetweenObjects, 0);
-                        _objController.UpdateObjectPosition(_objectList[_objectList.Count - 2].transform, true);
+                        Vector3 _newPosition;
+                        _currentObjectPos.y = _lastObject.transform.position.y;//current object pos y'yi bir önceki objenin y'sine getiriyoruz
+                        //other.gameObject.transform.position = _currentObjectPos + new Vector3(0, GameManager.Instance.distanceBetweenObjects, 0);//çarptýðýmýz objenin pozisyhonunu bir önceki objenin pozisyonunn üzerine eklenmiþ halini yapýyoruz
+                        _newPosition = _currentObjectPos + new Vector3(0, GameManager.Instance.distanceBetweenObjects, 0);
+                        other.gameObject.transform.position += _newPosition;
+                        _objController.UpdateObjectPosition(_objectList[_objectList.Count - 2].transform, true);//, _objectList.Count
                         StartCoroutine(nameof(ChangeCharacterState));
                     }
                     _lastObject = other.gameObject;//çarptýðýmýz obje son objemiz olacak
@@ -78,7 +80,7 @@ public class CharacterController : MonoBehaviour//CharacterController
                         GridController.Instance.emptyGridNumber++;
                         ChangeLastObject();
 
-                        if (_objectList.Count<=0)
+                        if (_objectList.Count <= 0)
                         {
                             PlayerAnimatorController.ChangeAnimationLayer(false);
                         }

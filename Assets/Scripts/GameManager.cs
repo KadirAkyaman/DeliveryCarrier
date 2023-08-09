@@ -9,7 +9,6 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
 
     public float characterStateCooldown = 1f;
-    public float itemDropCooldown = 1f;
 
     public float objectCollectDistance = 2f;
     public float distanceBetweenObjects = 0.5f;

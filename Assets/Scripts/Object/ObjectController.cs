@@ -18,8 +18,6 @@ public class ObjectController : MonoBehaviour
 
     [SerializeField] private GameObject _gridObject;
 
-
-
     private void Start()
     {
         moveToCell = false;
