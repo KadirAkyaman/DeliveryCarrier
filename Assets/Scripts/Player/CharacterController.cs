@@ -14,8 +14,16 @@ public class CharacterController : MonoBehaviour//CharacterController
 
     [SerializeField] private GameObject _lastObject;
 
+    private int _count;
     private PlayerAnimatorController PlayerAnimatorController => playerAnimatorController ??= GetComponent<PlayerAnimatorController>();
     private PlayerAnimatorController playerAnimatorController;
+
+    private void Start()
+    {
+        PlayerAnimatorController.ChangeAnimationLayer(false);
+        //_count = GridController.Instance._maxObjectOnCell;
+        _count = 0;
+    }
 
     private void Awake()
     {
@@ -40,18 +48,13 @@ public class CharacterController : MonoBehaviour//CharacterController
 
                     if (_objectList.Count == 1)
                     {
-                        _objController.UpdateObjectPosition(_firstObjectPos, true);//, _objectList.Count
+                        _objController.UpdateObjectPosition(_firstObjectPos, true, 0);//, _objectList.Count
                         StartCoroutine(nameof(ChangeCharacterState));
                         PlayerAnimatorController.ChangeAnimationLayer(true);
                     }
                     else if (_objectList.Count > 1)
                     {
-                        Vector3 _newPosition;
-                        _currentObjectPos.y = _lastObject.transform.position.y;//current object pos y'yi bir önceki objenin y'sine getiriyoruz
-                        //other.gameObject.transform.position = _currentObjectPos + new Vector3(0, GameManager.Instance.distanceBetweenObjects, 0);//çarptýðýmýz objenin pozisyhonunu bir önceki objenin pozisyonunn üzerine eklenmiþ halini yapýyoruz
-                        _newPosition = _currentObjectPos + new Vector3(0, GameManager.Instance.distanceBetweenObjects, 0);
-                        other.gameObject.transform.position += _newPosition;
-                        _objController.UpdateObjectPosition(_objectList[_objectList.Count - 2].transform, true);//, _objectList.Count
+                        _objController.UpdateObjectPosition(_objectList[_objectList.Count - 2].transform, true, _objectList.Count);//, _objectList.Count
                         StartCoroutine(nameof(ChangeCharacterState));
                     }
                     _lastObject = other.gameObject;//çarptýðýmýz obje son objemiz olacak
@@ -76,8 +79,15 @@ public class CharacterController : MonoBehaviour//CharacterController
                     _lastObject.transform.rotation = Quaternion.Euler(-90, 0, 0);
                     if (_lastObject != null)
                     {
-                        _objController.PlaceObjectOnCell(GridController.Instance.cells[GridController.Instance.emptyGridNumber].transform);
-                        GridController.Instance.emptyGridNumber++;
+
+                        _objController.PlaceObjectOnCell(GridController.Instance.cells[GridController.Instance.emptyGridNumber].transform.position + new Vector3(0, _count * GameManager.Instance.distanceBetweenObjects, 0)); ;
+                        _count++;
+                        if (_count >= GridController.Instance._maxObjectOnCell)
+                        {
+                            _count = 0;
+                            GridController.Instance.emptyGridNumber++;
+                        }
+
                         ChangeLastObject();
 
                         if (_objectList.Count <= 0)

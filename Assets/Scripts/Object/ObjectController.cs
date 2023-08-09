@@ -31,40 +31,54 @@ public class ObjectController : MonoBehaviour
     {
         Instance = this;
     }
-    public void UpdateObjectPosition(Transform followedObject, bool isFollowStart)
+    public void UpdateObjectPosition(Transform followedObject, bool isFollowStart, int count)
     {
 
-        StartCoroutine(StartFollowingToLastObjectPosition(followedObject, isFollowStart));
+        StartCoroutine(StartFollowingToLastObjectPosition(followedObject, isFollowStart, count));
     }
 
-    IEnumerator StartFollowingToLastObjectPosition(Transform followedObject, bool isFollowStart)
+    IEnumerator StartFollowingToLastObjectPosition(Transform followedObject, bool isFollowStart, int count)
     {
 
-        while (isFollowStart)
+        if (count == 1)
         {
+            while (isFollowStart)
+            {
 
-            yield return new WaitForEndOfFrame();
-            transform.position = new Vector3(Mathf.Lerp(transform.position.x, followedObject.position.x, followSpeed * Time.deltaTime), transform.position.y, Mathf.Lerp(transform.position.z, followedObject.position.z, followSpeed * Time.deltaTime));
-            if (moveToCell)
-                break;
+                yield return new WaitForEndOfFrame();
+                transform.position = new Vector3(Mathf.Lerp(transform.position.x, followedObject.position.x, 5 * followSpeed * Time.deltaTime), transform.position.y, Mathf.Lerp(transform.position.z, followedObject.position.z, 5 * followSpeed * Time.deltaTime));
+                if (moveToCell)
+                    break;
+            }
+        }
+        else
+        {
+            while (isFollowStart)
+            {
+
+                yield return new WaitForEndOfFrame();
+                transform.position = new Vector3(Mathf.Lerp(transform.position.x, followedObject.position.x, 5 * followSpeed * Time.deltaTime), Mathf.Lerp(transform.position.y, GameManager.Instance.distanceBetweenObjects * count, followSpeed * Time.deltaTime), Mathf.Lerp(transform.position.z, followedObject.position.z, 5 * followSpeed * Time.deltaTime));
+                if (moveToCell)
+                    break;
+            }
         }
     }
 
 
 
-    public void PlaceObjectOnCell(Transform _lastObject)
+    public void PlaceObjectOnCell(Vector3 _lastObject)
     {
-        StartCoroutine(FollowingToCell(_lastObject.transform));
+        StartCoroutine(FollowingToCell(_lastObject));
     }
 
-    IEnumerator FollowingToCell(Transform followedObject)
+    IEnumerator FollowingToCell(Vector3 followedObject)
     {
 
         while (!onCell)
         {
             yield return new WaitForEndOfFrame();
             transform.parent = _gridObject.transform;
-            transform.position = new Vector3(Mathf.Lerp(transform.position.x, followedObject.position.x, followSpeed * Time.deltaTime), Mathf.Lerp(transform.position.y, followedObject.position.y, followSpeed * Time.deltaTime), Mathf.Lerp(transform.position.z, followedObject.position.z, followSpeed * Time.deltaTime));
+            transform.position = new Vector3(Mathf.Lerp(transform.position.x, followedObject.x, followSpeed * Time.deltaTime), Mathf.Lerp(transform.position.y, followedObject.y, followSpeed * Time.deltaTime), Mathf.Lerp(transform.position.z, followedObject.z, followSpeed * Time.deltaTime));
         }
     }
 }

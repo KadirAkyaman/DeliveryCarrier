@@ -11,6 +11,7 @@ public class GridController : MonoBehaviour
 
     public int _height;
     public int _width;
+    public int _maxObjectOnCell;
 
     private Node[,] _nodes;
 
