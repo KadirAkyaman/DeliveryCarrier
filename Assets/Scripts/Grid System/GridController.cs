@@ -38,7 +38,7 @@ public class GridController : MonoBehaviour
         emptyGridNumber = 0;
     }
 
-    private void CreateGrid()
+    public void CreateGrid()
     {
         _nodes = new Node[_width, _height];
         var name = 0;

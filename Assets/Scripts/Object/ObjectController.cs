@@ -73,13 +73,20 @@ public class ObjectController : MonoBehaviour
 
     IEnumerator FollowingToCell(Vector3 followedObject)
     {
-
+        StartCoroutine(nameof(ChangeOnCell));//Objenin oncell true oluyor, bu sayede pool'a ekleyeceðiz
         while (!onCell)
         {
             yield return new WaitForEndOfFrame();
             transform.parent = _gridObject.transform;
             transform.position = new Vector3(Mathf.Lerp(transform.position.x, followedObject.x, followSpeed * Time.deltaTime), Mathf.Lerp(transform.position.y, followedObject.y, followSpeed * Time.deltaTime), Mathf.Lerp(transform.position.z, followedObject.z, followSpeed * Time.deltaTime));
         }
+    }
+
+    IEnumerator ChangeOnCell()
+    {
+        yield return new WaitForSeconds(1f);
+        onCell = true;
+        onPlayer = false;
     }
 }
 

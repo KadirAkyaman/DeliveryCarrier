@@ -7,22 +7,39 @@ public class CharacterController : MonoBehaviour//CharacterController
     [SerializeField] private Transform _player;
     public static CharacterController Instance;
 
-    private Vector3 _currentObjectPos;
-    [SerializeField] private Transform _firstObjectPos;
+    //OBJECT STACK POSITIONS
+    [SerializeField] private int _objectZCount;
+    [SerializeField] private Transform _parentObjectPosition;
+    [SerializeField] private List<Transform> _stackStartObjects;
+    private int _objectsYCount;
 
     public List<GameObject> _objectList = new List<GameObject>();
+    public List<GameObject> _objectsListOnCell = new List<GameObject>();
 
     [SerializeField] private GameObject _lastObject;
+    [SerializeField] private GameObject _heldObjectParent;
 
     private int _count;
+    private int _stackNum;
+
+
     private PlayerAnimatorController PlayerAnimatorController => playerAnimatorController ??= GetComponent<PlayerAnimatorController>();
     private PlayerAnimatorController playerAnimatorController;
 
     private void Start()
     {
         PlayerAnimatorController.ChangeAnimationLayer(false);
-        //_count = GridController.Instance._maxObjectOnCell;
         _count = 0;
+        _stackNum = 0;
+        _objectsYCount = 1;
+        for (int i = 0; i < _objectZCount; i++)
+        {
+            GameObject _obj = new GameObject(i + ".StartPos");
+
+            _obj.transform.parent = _parentObjectPosition;
+            _obj.transform.position = new Vector3(0, 0, i + 0.566f);
+            _stackStartObjects.Add(_obj.transform);
+        }
     }
 
     private void Awake()
@@ -39,25 +56,75 @@ public class CharacterController : MonoBehaviour//CharacterController
             ObjectController _objController = other.GetComponent<ObjectController>();//DÜZENLENDÝ
             if (!_objController.moveToCell && !_objController.onPlayer)
             {
-                if (_objectList.Count < GameManager.Instance.maxStackSize)//Karakterimiz üst üste kaç obje toplayabilir?
+                if (_objectList.Count < GameManager.Instance.maxStackSize * _objectZCount)
                 {
 
                     _objController.onPlayer = true;
                     _objectList.Add(other.gameObject);
+                    other.gameObject.transform.parent = _heldObjectParent.transform;
 
+                    if (_stackNum == 0)
+                    {
+                        if (_objectList.Count == 1)
+                        {
+                            _objController.UpdateObjectPosition(_stackStartObjects[_stackNum], true, 0);
+                            StartCoroutine(nameof(ChangeCharacterState));
+                            PlayerAnimatorController.ChangeAnimationLayer(true);
+                        }
+                        else if (_objectList.Count > 1)
+                        {
+                            _objController.UpdateObjectPosition(_objectList[_objectList.Count - 2].transform, true, _objectsYCount);
+                            _objectsYCount++;
+                            StartCoroutine(nameof(ChangeCharacterState));
+                        }
 
-                    if (_objectList.Count == 1)
-                    {
-                        _objController.UpdateObjectPosition(_firstObjectPos, true, 0);//, _objectList.Count
-                        StartCoroutine(nameof(ChangeCharacterState));
-                        PlayerAnimatorController.ChangeAnimationLayer(true);
+                        if (_objectList.Count >= GameManager.Instance.maxStackSize)
+                        {
+                            _stackNum++;
+                            _objectsYCount = 1;
+                        }
                     }
-                    else if (_objectList.Count > 1)
+                    else if (_stackNum == 1)
                     {
-                        _objController.UpdateObjectPosition(_objectList[_objectList.Count - 2].transform, true, _objectList.Count);//, _objectList.Count
-                        StartCoroutine(nameof(ChangeCharacterState));
+                        if (_objectList.Count == GameManager.Instance.maxStackSize + 1)
+                        {
+                            _objController.UpdateObjectPosition(_stackStartObjects[_stackNum], true, 0);
+                            StartCoroutine(nameof(ChangeCharacterState));
+                        }
+                        else if (_objectList.Count > GameManager.Instance.maxStackSize + 1)
+                        {
+                            _objController.UpdateObjectPosition(_objectList[_objectList.Count - 2].transform, true, _objectsYCount);
+                            _objectsYCount++;
+                            StartCoroutine(nameof(ChangeCharacterState));
+                        }
+
+                        if (_objectList.Count >= GameManager.Instance.maxStackSize * 2)
+                        {
+                            _stackNum++;
+                            _objectsYCount = 1;
+                        }
                     }
-                    _lastObject = other.gameObject;//çarptýðýmýz obje son objemiz olacak
+                    else if (_stackNum > 1)
+                    {
+                        if (_objectList.Count == GameManager.Instance.maxStackSize * _stackNum + 1)
+                        {
+                            _objController.UpdateObjectPosition(_stackStartObjects[_stackNum], true, 0);
+                            StartCoroutine(nameof(ChangeCharacterState));
+                        }
+                        else if (_objectList.Count > GameManager.Instance.maxStackSize * _stackNum + 1)
+                        {
+                            _objController.UpdateObjectPosition(_objectList[_objectList.Count - 2].transform, true, _objectsYCount);
+                            _objectsYCount++;
+                            StartCoroutine(nameof(ChangeCharacterState));
+                        }
+
+                        if (_objectList.Count >= GameManager.Instance.maxStackSize * (_stackNum + 1))
+                        {
+                            _stackNum++;
+                            _objectsYCount = 1;
+                        }
+                    }
+                    _lastObject = other.gameObject;
                 }
             }
         }
@@ -79,6 +146,10 @@ public class CharacterController : MonoBehaviour//CharacterController
                     _lastObject.transform.rotation = Quaternion.Euler(-90, 0, 0);
                     if (_lastObject != null)
                     {
+                        //OBJENIN YUKSEKLIGINI AYARLAMA BOLUMU
+                        _objectsYCount = _objectList.Count % GameManager.Instance.maxStackSize - 1;
+
+
 
                         _objController.PlaceObjectOnCell(GridController.Instance.cells[GridController.Instance.emptyGridNumber].transform.position + new Vector3(0, _count * GameManager.Instance.distanceBetweenObjects, 0)); ;
                         _count++;
@@ -86,6 +157,11 @@ public class CharacterController : MonoBehaviour//CharacterController
                         {
                             _count = 0;
                             GridController.Instance.emptyGridNumber++;
+                        }
+
+                        if (_objController.moveToCell)
+                        {
+                            AddObjectsOnCellList();//Son objeyi Cell'deki objelerin listesine ekle
                         }
 
                         ChangeLastObject();
@@ -100,8 +176,14 @@ public class CharacterController : MonoBehaviour//CharacterController
                         GridController.Instance.isCellOccupied = true;
                     }
                 }
+                _stackNum = Mathf.RoundToInt(_objectList.Count / GameManager.Instance.maxStackSize);
+            }
+            else
+            {
+                _stackNum = 0;
             }
         }
+
     }
 
     void ChangeLastObject()
@@ -111,6 +193,11 @@ public class CharacterController : MonoBehaviour//CharacterController
         {
             _lastObject = _objectList[_objectList.Count - 1];
         }
+    }
+
+    void AddObjectsOnCellList()
+    {
+        _objectsListOnCell.Add(_lastObject);
     }
 
 
