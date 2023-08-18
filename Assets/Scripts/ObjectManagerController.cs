@@ -15,7 +15,7 @@ public class ObjectManagerController : MonoBehaviour
     {
         if (CharacterController.Instance._objectsListOnCell.Count > 0)//listede obje varsa
         {
-            if (Input.GetKeyDown(KeyCode.P) && GridController.Instance.isCellOccupied)
+            if (Input.GetKeyDown(KeyCode.T) && GridController.Instance.isCellOccupied)
             {
 
                 GridController.Instance.isCellOccupied = false;
@@ -33,7 +33,7 @@ public class ObjectManagerController : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.O))
+        if (Input.GetKeyDown(KeyCode.Y))
         {
             foreach (Transform childTransform in _objectsParent.GetComponentsInChildren<Transform>(true))
             {

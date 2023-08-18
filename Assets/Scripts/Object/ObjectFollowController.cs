@@ -2,9 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ObjectController : MonoBehaviour
+public class ObjectFollowController : MonoBehaviour
 {
-    public static ObjectController Instance;
+    public static ObjectFollowController Instance;
 
     [SerializeField] private float followSpeed;
 
@@ -57,7 +57,7 @@ public class ObjectController : MonoBehaviour
             {
 
                 yield return new WaitForEndOfFrame();
-                transform.position = new Vector3(Mathf.Lerp(transform.position.x, followedObject.position.x, 5 * followSpeed * Time.deltaTime), Mathf.Lerp(transform.position.y, GameManager.Instance.distanceBetweenObjects * count, followSpeed * Time.deltaTime), Mathf.Lerp(transform.position.z, followedObject.position.z, 5 * followSpeed * Time.deltaTime));
+                transform.position = new Vector3(Mathf.Lerp(transform.position.x, followedObject.position.x, 5 * followSpeed * Time.deltaTime), Mathf.Lerp(transform.position.y, ObjectPool.Instance.distanceBetweenObjects * count, followSpeed * Time.deltaTime), Mathf.Lerp(transform.position.z, followedObject.position.z, 5 * followSpeed * Time.deltaTime));
                 if (moveToCell)
                     break;
             }

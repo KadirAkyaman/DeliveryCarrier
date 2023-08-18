@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -22,6 +23,8 @@ public class CharacterController : MonoBehaviour//CharacterController
     private int _count;
     private int _stackNum;
 
+    //AUDIO SOURCE
+    [SerializeField] AudioSource audioSource;
 
     private PlayerAnimatorController PlayerAnimatorController => playerAnimatorController ??= GetComponent<PlayerAnimatorController>();
     private PlayerAnimatorController playerAnimatorController;
@@ -32,6 +35,11 @@ public class CharacterController : MonoBehaviour//CharacterController
         _count = 0;
         _stackNum = 0;
         _objectsYCount = 1;
+        CreateStartPos();
+    }
+
+    private void CreateStartPos()
+    {
         for (int i = 0; i < _objectZCount; i++)
         {
             GameObject _obj = new GameObject(i + ".StartPos");
@@ -53,12 +61,15 @@ public class CharacterController : MonoBehaviour//CharacterController
 
         if (other.CompareTag("Pizza") && GameManager.Instance.characterState == CharacterState.Available)//Deðdiðimiz son obje cell'e gitmiyorsa
         {
-            ObjectController _objController = other.GetComponent<ObjectController>();//DÜZENLENDÝ
+            ObjectFollowController _objController = other.GetComponent<ObjectFollowController>();//DÜZENLENDÝ
             if (!_objController.moveToCell && !_objController.onPlayer)
             {
                 if (_objectList.Count < GameManager.Instance.maxStackSize * _objectZCount)
                 {
 
+                    PlayPopSound();
+
+                    #region FollowObject
                     _objController.onPlayer = true;
                     _objectList.Add(other.gameObject);
                     other.gameObject.transform.parent = _heldObjectParent.transform;
@@ -125,9 +136,17 @@ public class CharacterController : MonoBehaviour//CharacterController
                         }
                     }
                     _lastObject = other.gameObject;
+
+                    #endregion
                 }
             }
         }
+    }
+
+    private void PlayPopSound()
+    {
+        audioSource.clip = SoundManager.Instance.popSoundEffect;
+        audioSource.Play();
     }
 
     private void OnCollisionStay(Collision collision)
@@ -140,7 +159,11 @@ public class CharacterController : MonoBehaviour//CharacterController
                 if (!GridController.Instance.isCellOccupied)//Gridde bos yer var mi?
                 {
 
-                    ObjectController _objController = _lastObject.GetComponent<ObjectController>();
+                    PlayThrowSound();
+
+                    #region FollowGrid
+
+                    ObjectFollowController _objController = _lastObject.GetComponent<ObjectFollowController>();
                     StartCoroutine(nameof(ChangeCharacterState));
                     _objController.moveToCell = true;//Cell'e gidecegini belirtiyoruz
                     _lastObject.transform.rotation = Quaternion.Euler(-90, 0, 0);
@@ -151,7 +174,7 @@ public class CharacterController : MonoBehaviour//CharacterController
 
 
 
-                        _objController.PlaceObjectOnCell(GridController.Instance.cells[GridController.Instance.emptyGridNumber].transform.position + new Vector3(0, _count * GameManager.Instance.distanceBetweenObjects, 0)); ;
+                        _objController.PlaceObjectOnCell(GridController.Instance.cells[GridController.Instance.emptyGridNumber].transform.position + new Vector3(0, _count * ObjectPool.Instance.distanceBetweenObjects, 0)); ;
                         _count++;
                         if (_count >= GridController.Instance._maxObjectOnCell)
                         {
@@ -175,6 +198,8 @@ public class CharacterController : MonoBehaviour//CharacterController
                     {
                         GridController.Instance.isCellOccupied = true;
                     }
+
+                    #endregion
                 }
                 _stackNum = Mathf.RoundToInt(_objectList.Count / GameManager.Instance.maxStackSize);
             }
@@ -182,8 +207,16 @@ public class CharacterController : MonoBehaviour//CharacterController
             {
                 _stackNum = 0;
             }
+
+
         }
 
+    }
+
+    private void PlayThrowSound()
+    {
+        audioSource.clip = SoundManager.Instance.throwSoundEffect;
+        audioSource.Play();
     }
 
     void ChangeLastObject()
