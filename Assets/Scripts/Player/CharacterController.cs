@@ -166,7 +166,7 @@ public class CharacterController : MonoBehaviour//CharacterController
                     ObjectFollowController _objController = _lastObject.GetComponent<ObjectFollowController>();
                     StartCoroutine(nameof(ChangeCharacterState));
                     _objController.moveToCell = true;//Cell'e gidecegini belirtiyoruz
-                    _lastObject.transform.rotation = Quaternion.Euler(-90, 0, 0);
+                    _lastObject.transform.rotation = Quaternion.Euler(0, 0, 0);
                     if (_lastObject != null)
                     {
                         //OBJENIN YUKSEKLIGINI AYARLAMA BOLUMU
