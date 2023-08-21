@@ -34,7 +34,7 @@ public class CharacterController : MonoBehaviour//CharacterController
         PlayerAnimatorController.ChangeAnimationLayer(false);
         _count = 0;
         _stackNum = 0;
-        _objectsYCount = 1;
+        _objectsYCount = 0;
         CreateStartPos();
     }
 
@@ -78,9 +78,10 @@ public class CharacterController : MonoBehaviour//CharacterController
                     {
                         if (_objectList.Count == 1)
                         {
-                            _objController.UpdateObjectPosition(_stackStartObjects[_stackNum], true, 0);
+                            _objController.UpdateObjectPosition(_stackStartObjects[_stackNum], true, _objectsYCount);
                             StartCoroutine(nameof(ChangeCharacterState));
                             PlayerAnimatorController.ChangeAnimationLayer(true);
+                            _objectsYCount++;
                         }
                         else if (_objectList.Count > 1)
                         {
@@ -92,15 +93,16 @@ public class CharacterController : MonoBehaviour//CharacterController
                         if (_objectList.Count >= GameManager.Instance.maxStackSize)
                         {
                             _stackNum++;
-                            _objectsYCount = 1;
+                            _objectsYCount = 0;
                         }
                     }
                     else if (_stackNum == 1)
                     {
                         if (_objectList.Count == GameManager.Instance.maxStackSize + 1)
                         {
-                            _objController.UpdateObjectPosition(_stackStartObjects[_stackNum], true, 0);
+                            _objController.UpdateObjectPosition(_stackStartObjects[_stackNum], true, _objectsYCount);
                             StartCoroutine(nameof(ChangeCharacterState));
+                            _objectsYCount++;
                         }
                         else if (_objectList.Count > GameManager.Instance.maxStackSize + 1)
                         {
@@ -112,15 +114,16 @@ public class CharacterController : MonoBehaviour//CharacterController
                         if (_objectList.Count >= GameManager.Instance.maxStackSize * 2)
                         {
                             _stackNum++;
-                            _objectsYCount = 1;
+                            _objectsYCount = 0;
                         }
                     }
                     else if (_stackNum > 1)
                     {
                         if (_objectList.Count == GameManager.Instance.maxStackSize * _stackNum + 1)
                         {
-                            _objController.UpdateObjectPosition(_stackStartObjects[_stackNum], true, 0);
+                            _objController.UpdateObjectPosition(_stackStartObjects[_stackNum], true, _objectsYCount);
                             StartCoroutine(nameof(ChangeCharacterState));
+                            _objectsYCount++;
                         }
                         else if (_objectList.Count > GameManager.Instance.maxStackSize * _stackNum + 1)
                         {
@@ -132,7 +135,7 @@ public class CharacterController : MonoBehaviour//CharacterController
                         if (_objectList.Count >= GameManager.Instance.maxStackSize * (_stackNum + 1))
                         {
                             _stackNum++;
-                            _objectsYCount = 1;
+                            _objectsYCount = 0;
                         }
                     }
                     _lastObject = other.gameObject;
@@ -206,6 +209,7 @@ public class CharacterController : MonoBehaviour//CharacterController
             else
             {
                 _stackNum = 0;
+                _lastObject = null;
             }
 
 

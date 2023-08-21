@@ -39,7 +39,6 @@ public class ObjectFollowController : MonoBehaviour
 
     IEnumerator StartFollowingToLastObjectPosition(Transform followedObject, bool isFollowStart, int count)
     {
-
         if (count == 0)
         {
             while (isFollowStart)

@@ -26,7 +26,7 @@ public class ObjectPool : MonoBehaviour
 
     private void Start()
     {
-        distanceBetweenObjects = _objectPrefab.GetComponent<BoxCollider>().size.y + 0.1f; // DISTANCE BETWEEN OBJECTS
+        distanceBetweenObjects = _objectPrefab.GetComponent<BoxCollider>().size.y + 0.1f;
         _pooledObjects = new Queue<GameObject>();
 
         for (int i = 0; i < _poolSize; i++)
@@ -44,14 +44,20 @@ public class ObjectPool : MonoBehaviour
         if (_pooledObjects.Count > 0)
         {
             GameObject obj = _pooledObjects.Dequeue();
-            if (!obj.GetComponent<ObjectFollowController>().onPlayer)//BU KISIM DUZELTILECEK
-            {
-                obj.transform.position = new Vector3(Random.Range(ObjectPoolManager.Instance.objectPoolMaxXCount / 2, -ObjectPoolManager.Instance.objectPoolMaxXCount / 2), _startPos.transform.position.y, Random.Range(_startPos.transform.position.z, _startPos.transform.position.z - ObjectPoolManager.Instance.objectPoolMaxZCount));
-                obj.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), Random.Range(0, 20));
 
-                obj.SetActive(true);
+            if (obj != null)
+            {
+                ObjectFollowController followController = obj.GetComponent<ObjectFollowController>();
+
+                if (followController != null && !followController.onPlayer && !followController.onCell)
+                {
+                    obj.transform.position = new Vector3(Random.Range(ObjectPoolManager.Instance.objectPoolMaxXCount / 2, -ObjectPoolManager.Instance.objectPoolMaxXCount / 2), _startPos.transform.position.y, Random.Range(_startPos.transform.position.z, _startPos.transform.position.z - ObjectPoolManager.Instance.objectPoolMaxZCount));
+                    obj.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), Random.Range(0, 20));
+
+                    obj.SetActive(true);
+                    return obj;
+                }
             }
-            return obj;
         }
         return null;
     }
