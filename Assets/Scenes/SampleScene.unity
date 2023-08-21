@@ -147,7 +147,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 16373777}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.5, z: 1.039}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1017,6 +1017,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _productCollection: {fileID: 11400000, guid: a0c98f8b1986efc489a664569d61bd5a, type: 2}
+  ItemCountChange:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &820166177
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2883,6 +2886,7 @@ MonoBehaviour:
   characterStateCooldown: 0.05
   objectMoveSpeed: 20
   maxStackSize: 10
+  distanceBetweenObjects: 0.5
 --- !u!4 &2136103691
 Transform:
   m_ObjectHideFlags: 0
