@@ -14,7 +14,6 @@ public class GameManager : MonoBehaviour
 
     public int maxStackSize;
 
-    public float distanceBetweenObjects = 0.5f;
 
     private void Awake()
     {
